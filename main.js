@@ -5,7 +5,7 @@ window.addEventListener('DOMContentLoaded', () => {
   );
 
   window.addPoints = async function(username, amount) {
-    // First, fetch current points
+    // Fetch current points
     const { data: userData, error: fetchError } = await supabaseClient
       .from('users')
       .select('points')
@@ -19,7 +19,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const newPoints = userData.points + amount;
 
-    // Then, update with new total
+    // Update with new total
     const { data, error } = await supabaseClient
       .from('users')
       .update({ points: newPoints })
