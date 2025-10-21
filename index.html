@@ -2,14 +2,21 @@
 <html>
 <head>
   <title>Coinexia</title>
-  <!-- Firebase v8 SDK (Browser-Friendly) -->
+  <!-- Firebase v8 SDK (Browser-Compatible) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="main.js" defer></script>
 </head>
-
 <body>
   <h1>Welcome to Coinexia</h1>
+
+  <!-- Earn Points Button -->
   <button onclick="addPoints('jayden', 10)">Earn 10 Points</button>
+
+  <!-- Check Points Button -->
+  <button onclick="checkPoints('jayden')">Check My Points</button>
+
+  <!-- Display Area -->
+  <p id="pointsDisplay">Current Points: ?</p>
 </body>
 </html>
