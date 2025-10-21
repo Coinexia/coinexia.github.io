@@ -8,7 +8,7 @@ const firebaseConfig = {
   appId: "1:235020899567:web:0d4b031bb45ee6990a371a"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // Add points to user
