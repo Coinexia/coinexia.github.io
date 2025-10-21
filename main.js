@@ -1,35 +1,29 @@
-window.addEventListener('DOMContentLoaded', () => {
-  // Make Supabase client globally accessible
-  window.supabaseClient = window.supabase.createClient(
-    'https://oiwqlyyxnpozsjfkofjx.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pd3FseXl4bnBvenNqZmtvZmp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjk2NTUsImV4cCI6MjA3NjYwNTY1NX0.GqozfTSNCHzTlr_eWswquuggWFBEm5FhnKpuPwubC0w'
-  );
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDJmHmlTwvpDwEt3EJc6KVpi4X8meZeffc",
+  authDomain: "coinexia-748b6.firebaseapp.com",
+  projectId: "coinexia-748b6",
+  storageBucket: "coinexia-748b6.firebasestorage.app",
+  messagingSenderId: "235020899567",
+  appId: "1:235020899567:web:0d4b031bb45ee6990a371a"
+};
 
-  // Define addPoints only after Supabase is ready
-  window.addPoints = async function(username, amount) {
-    const { data: userData, error: fetchError } = await window.supabaseClient
-      .from('users')
-      .select('username, points')
-      .eq('username', username);
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    console.log('Raw fetch result:', userData);
+// Add points to user
+window.addPoints = async function(username, amount) {
+  const userRef = db.collection('users').doc(username);
+  const doc = await userRef.get();
 
-    if (fetchError || !userData || userData.length === 0) {
-      console.error('Error fetching user:', fetchError);
-      return;
-    }
+  if (!doc.exists) {
+    console.error('User not found');
+    return;
+  }
 
-    const newPoints = userData[0].points + amount;
+  const currentPoints = doc.data().points || 0;
+  const newPoints = currentPoints + amount;
 
-    const { data, error } = await window.supabaseClient
-      .from('users')
-      .update({ points: newPoints })
-      .eq('username', username);
-
-    if (error) {
-      console.error('Error updating points:', error);
-    } else {
-      console.log('Points updated:', data);
-    }
-  };
-});
+  await userRef.update({ points: newPoints });
+  console.log(`Points updated: ${newPoints}`);
+};
