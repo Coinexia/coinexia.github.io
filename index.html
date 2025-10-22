@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html>
 <head>
   <title>Coinexia</title>
   <!-- Firebase v8 SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> <!-- 👈 Add this line -->
-  <script src="main.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 </head>
-
 <body>
   <h1>Welcome to Coinexia</h1>
 
@@ -24,5 +20,7 @@
 
   <!-- Display Area -->
   <p id="pointsDisplay">Current Points: ?</p>
+
+  <!-- Load your script AFTER Firebase is ready -->
+  <script src="main.js"></script>
 </body>
-</html>
