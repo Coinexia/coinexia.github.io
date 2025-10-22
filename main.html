@@ -60,7 +60,7 @@
 
     <div class="leaderboard">
       <h3>🏆 Leaderboard Preview</h3>
-      <p>Coming soon...</p>
+      <ul id="leaderboardList" style="list-style: none; padding: 0;"></ul>
     </div>
   </div>
 
@@ -85,10 +85,27 @@
         const points = userDoc.exists ? userDoc.data().points || 0 : 0;
         document.getElementById('points').textContent = `Your points: ${points}`;
         document.getElementById('referralLink').textContent = `https://coinexia.github.io/?ref=${user.uid}`;
+        loadLeaderboard(); // ✅ This is now called properly
       } else {
         window.location.href = "index.html";
       }
     });
+
+    async function loadLeaderboard() {
+      const snapshot = await db.collection('users').orderBy('points', 'desc').limit(5).get();
+      const list = document.getElementById('leaderboardList');
+      list.innerHTML = '';
+
+      snapshot.forEach((doc, index) => {
+        const data = doc.data();
+        const name = data.displayName || "Anonymous";
+        const points = data.points || 0;
+        const li = document.createElement('li');
+        li.textContent = `#${index + 1} ${name} — ${points} pts`;
+        li.style.margin = '6px 0';
+        list.appendChild(li);
+      });
+    }
 
     function earnPoints() {
       alert("Points earning system coming soon!");
