@@ -21,11 +21,8 @@ async function showUserCount() {
 
 // Show runtime since launch
 function showRuntime() {
-  const launchDate = new Date('2024-06-01'); // Set your actual launch date
-  const now = new Date();
-  const diff = now - launchDate;
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  document.getElementById('runtime').textContent = `Running for ${days} days`;
+  const currentYear = new Date().getFullYear();
+  document.getElementById('runtime').textContent = `Established ${currentYear}`;
 }
 
 // Login with Google
