@@ -71,13 +71,14 @@ async function showTopUser() {
   }
 }
 
-// Login with Google
+// Login with Google and redirect to dashboard
 window.login = function() {
   const provider = new firebase.auth.GoogleAuthProvider();
   auth.signInWithPopup(provider)
     .then(result => {
       const user = result.user;
       alert(`Welcome, ${user.displayName}`);
+      window.location.href = "main.html";
     })
     .catch(error => {
       console.error('Login failed:', error);
