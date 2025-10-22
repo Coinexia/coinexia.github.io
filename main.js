@@ -25,6 +25,22 @@ function showRuntime() {
   document.getElementById('runtime').textContent = `Established ${currentYear}`;
 }
 
+// Show top user and their points
+async function showTopUser() {
+  const snapshot = await db.collection('users').orderBy('points', 'desc').limit(1).get();
+  if (!snapshot.empty) {
+    const topUser = snapshot.docs[0].data();
+    const name = topUser.displayName || "Anonymous";
+    const points = topUser.points || 0;
+    const statText = `Top user: ${name} with ${points} points`;
+    const statElement = document.createElement('p');
+    statElement.textContent = statText;
+    statElement.style.marginTop = '20px';
+    statElement.style.fontSize = '1.1em';
+    document.querySelector('footer').appendChild(statElement);
+  }
+}
+
 // Login with Google
 window.login = function() {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -41,3 +57,4 @@ window.login = function() {
 // Run on load
 showUserCount();
 showRuntime();
+showTopUser();
