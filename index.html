@@ -41,21 +41,50 @@
       line-height: 1.6;
     }
     .intro {
-  margin-top: 40px;
-  font-size: 1.1em;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
-}
+      margin-top: 40px;
+     font-size: 1.1em;
+     max-width: 600px;
+     margin-left: auto;
+     margin-right: auto;
+     line-height: 1.6;
+   }
 
-footer {
-  margin-top: 60px;
-  padding: 20px;
-  text-align: center;
-  font-size: 1em;
-  color: #ccc;
-}
+   footer {
+     margin-top: 60px;
+     padding: 20px;
+     text-align: center;
+     font-size: 1em;
+     color: #ccc;
+   }
+ 
+    .supported-cryptos {
+     margin-top: 40px;
+     text-align: center;
+   }
+
+   .crypto-badges {
+    margin-top: 10px;
+    display: flex;
+     justify-content: center;
+     flex-wrap: wrap;
+      gap: 10px;
+   }
+
+   .badge {
+     background-color: #333;
+     color: #fff;
+     padding: 8px 16px;
+     border-radius: 20px;
+     font-weight: bold;
+     font-size: 0.9em;
+     box-shadow: 0 0 5px rgba(0,0,0,0.3);
+     transition: background-color 0.3s;
+   }
+
+   .badge:hover {
+     background-color: #4caf50;
+     cursor: default;
+   }
  </style>
 
   <!-- Firebase SDKs -->
@@ -73,6 +102,19 @@ footer {
   <div class="intro">
   <h2>Welcome to the future of crypto rewards</h2>
   <p>Coinexia isn’t just another points site. It’s a platform built for grinders, creators, and crypto believers. Whether you're here to earn, compete, or connect, you're part of something bigger.</p>
+</div>
+
+<div class="supported-cryptos">
+  <h2>Supported Cryptocurrencies</h2>
+  <div class="crypto-badges">
+    <span class="badge">BTC</span>
+    <span class="badge">ETH</span>
+    <span class="badge">SOL</span>
+    <span class="badge">MATIC</span>
+    <span class="badge">AVAX</span>
+    <span class="badge">XRP</span>
+    <span class="badge">DOGE</span>
+  </div>
 </div>
 
   <div class="about">
