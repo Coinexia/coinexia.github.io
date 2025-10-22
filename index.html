@@ -28,9 +28,38 @@
       padding: 40px;
       text-align: center;
     }
-    .stats {
-      margin-top: 20px;
-      font-size: 1.2em;
+    .intro {
+      margin-top: 40px;
+      font-size: 1.1em;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+    .supported-cryptos {
+      margin-top: 40px;
+      text-align: center;
+    }
+    .crypto-badges {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .badge {
+      background-color: #333;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9em;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      transition: background-color 0.3s;
+    }
+    .badge:hover {
+      background-color: #4caf50;
+      cursor: default;
     }
     .about {
       margin-top: 40px;
@@ -40,52 +69,14 @@
       margin-right: auto;
       line-height: 1.6;
     }
-    .intro {
-      margin-top: 40px;
-     font-size: 1.1em;
-     max-width: 600px;
-     margin-left: auto;
-     margin-right: auto;
-     line-height: 1.6;
-   }
-
-   footer {
-     margin-top: 60px;
-     padding: 20px;
-     text-align: center;
-     font-size: 1em;
-     color: #ccc;
-   }
- 
-    .supported-cryptos {
-     margin-top: 40px;
-     text-align: center;
-   }
-
-   .crypto-badges {
-    margin-top: 10px;
-    display: flex;
-     justify-content: center;
-     flex-wrap: wrap;
-      gap: 10px;
-   }
-
-   .badge {
-     background-color: #333;
-     color: #fff;
-     padding: 8px 16px;
-     border-radius: 20px;
-     font-weight: bold;
-     font-size: 0.9em;
-     box-shadow: 0 0 5px rgba(0,0,0,0.3);
-     transition: background-color 0.3s;
-   }
-
-   .badge:hover {
-     background-color: #4caf50;
-     cursor: default;
-   }
- </style>
+    footer {
+      margin-top: 60px;
+      padding: 20px;
+      text-align: center;
+      font-size: 1em;
+      color: #ccc;
+    }
+  </style>
 
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -99,40 +90,47 @@
   </header>
 
   <main>
-  <div class="intro">
-  <h2>Welcome to the future of crypto rewards</h2>
-  <p>Coinexia isn’t just another points site. It’s a platform built for grinders, creators, and crypto believers. Whether you're here to earn, compete, or connect, you're part of something bigger.</p>
-</div>
+    <div class="intro">
+      <h2>Welcome to the future of crypto rewards</h2>
+      <p>Coinexia isn’t just another points site. It’s a platform built for grinders, creators, and crypto believers. Whether you're here to earn, compete, or connect, you're part of something bigger.</p>
+    </div>
 
-<div class="supported-cryptos">
+    <div class="supported-cryptos">
   <h2>Supported Cryptocurrencies</h2>
   <div class="crypto-badges">
-    <span class="badge">BTC</span>
-    <span class="badge">ETH</span>
-    <span class="badge">SOL</span>
-    <span class="badge">MATIC</span>
-    <span class="badge">AVAX</span>
-    <span class="badge">XRP</span>
-    <span class="badge">DOGE</span>
+    <span class="badge">🕵️ XMR</span>
+    <span class="badge">₿ BTC</span>
+    <span class="badge">🧠 ETH</span>
+    <span class="badge">💎 LTC</span>
+    <span class="badge">🐶 DOGE</span>
+    <span class="badge">🧱 BASE</span>
+    <span class="badge">💰 BCH</span>
+    <span class="badge">🔷 POL</span>
+    <span class="badge">🔥 SOL</span>
+    <span class="badge">🚀 TRX</span>
+    <span class="badge">⚡ XNO</span>
+    <span class="badge">🧬 ZANO</span>
+    <span class="badge">🔒 DCR</span>
+    <span class="badge">😎 WOW</span>
   </div>
 </div>
 
-  <div class="about">
-  <h2>About Coinexia</h2>
-  <p>Coinexia is a grind-to-earn crypto reward platform built for fairness, community, and viral growth. Our mission is simple: reward effort, not luck. Whether you're completing tasks, engaging with the community, or climbing the leaderboard, every point you earn brings you closer to real crypto rewards.</p>
+    <div class="about">
+      <h2>About Coinexia</h2>
+      <p>Coinexia is a grind-to-earn crypto reward platform built for fairness, community, and viral growth. Our mission is simple: reward effort, not luck. Whether you're completing tasks, engaging with the community, or climbing the leaderboard, every point you earn brings you closer to real crypto rewards.</p>
 
-  <p>We support major cryptocurrencies including Bitcoin (BTC), Ethereum (ETH), Solana (SOL), and Polygon (MATIC). We're also exploring new tokens that align with our values. Coinexia is designed to be uncopyable, with anti-cheat systems, secure backend logic, and a transparent point economy that keeps the game fair for everyone.</p>
+      <p>We support a diverse range of cryptocurrencies including Monero (XMR), Bitcoin (BTC), Ethereum (ETH), Litecoin (LTC), Dogecoin (DOGE), and more. Coinexia is designed to be uncopyable, with anti-cheat systems, secure backend logic, and a transparent point economy that keeps the game fair for everyone.</p>
 
-  <p>What sets Coinexia apart is its focus on community-driven growth. Users can refer friends, compete in seasonal challenges, and unlock exclusive perks as they level up. The platform is lightweight, fast, and optimized for viral sharing across desktop and mobile.</p>
+      <p>What sets Coinexia apart is its focus on community-driven growth. Users can refer friends, compete in seasonal challenges, and unlock exclusive perks as they level up. The platform is lightweight, fast, and optimized for viral sharing across desktop and mobile.</p>
 
-  <p>Launched in 2025, Coinexia is more than just a rewards site. It's a movement built by creators who care about integrity, scalability, and user experience. We're here to redefine what it means to earn in the crypto space. No fluff, no fake promises. Just real rewards for real effort.</p>
-</div>
+      <p>Launched in 2025, Coinexia is more than just a rewards site. It's a movement built by creators who care about integrity, scalability, and user experience. We're here to redefine what it means to earn in the crypto space. No fluff, no fake promises. Just real rewards for real effort.</p>
+    </div>
 
-  <footer>
-    <p id="userCount">Loading user count...</p>
-    <p id="runtime">Calculating...</p>
-  </footer>
-</main>
+    <footer>
+      <p id="userCount">Loading user count...</p>
+      <p id="runtime">Calculating...</p>
+    </footer>
+  </main>
 
   <script src="main.js"></script>
 </body>
