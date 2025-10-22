@@ -1,26 +1,71 @@
+<!DOCTYPE html>
+<html>
 <head>
   <title>Coinexia</title>
-  <!-- Firebase v8 SDKs -->
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: #2c2c2c;
+    }
+    .login-btn {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    main {
+      padding: 40px;
+      text-align: center;
+    }
+    .stats {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+    .about {
+      margin-top: 40px;
+      font-size: 1em;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+  </style>
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 </head>
 <body>
-  <h1>Welcome to Coinexia</h1>
+  <header>
+    <h1>Coinexia</h1>
+    <button class="login-btn" onclick="login()">Sign in</button>
+  </header>
 
-  <!-- Login Button -->
-  <button onclick="login()">Sign in with Google</button>
-  <p id="userStatus">Not signed in</p>
+  <main>
+    <div class="stats">
+      <p id="userCount">Loading user count...</p>
+      <p id="runtime">Calculating runtime...</p>
+    </div>
 
-  <!-- Earn Points Button -->
-  <button onclick="addPoints()" disabled>Earn 10 Points</button>
+    <div class="about">
+      <h2>About Coinexia</h2>
+      <p>Coinexia is a grind-to-earn crypto reward platform built for fairness, community, and viral growth. We support Bitcoin (BTC), Ethereum (ETH), Solana (SOL), and more — with zero tolerance for cheating.</p>
+      <p>Earn points, climb the leaderboard, and unlock crypto rewards. Built with Firebase, secured with backend logic, and designed to be unforgettable.</p>
+    </div>
+  </main>
 
-  <!-- Check Points Button -->
-  <button onclick="checkPoints()" disabled>Check My Points</button>
-
-  <!-- Display Area -->
-  <p id="pointsDisplay">Current Points: ?</p>
-
-  <!-- Load your script AFTER Firebase is ready -->
   <script src="main.js"></script>
 </body>
+</html>
