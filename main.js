@@ -19,6 +19,36 @@ async function showUserCount() {
   document.getElementById('userCount').textContent = `Total users: ${count}`;
 }
 
+// Show a Daily Challenge
+function showDailyChallenge() {
+  const challenges = [
+    "Earn 50 points by completing 3 tasks",
+    "Refer 1 friend and earn a bonus",
+    "Log in and earn 10 points instantly",
+    "Complete a challenge streak for 3 days",
+    "Earn points by engaging with the leaderboard"
+  ];
+  const index = new Date().getDate() % challenges.length;
+  document.getElementById('challengeText').textContent = challenges[index];
+}
+
+// shows total poins earned across all users and amount of active users
+async function showLiveStats() {
+  const snapshot = await db.collection('users').get();
+  let totalPoints = 0;
+  let activeToday = 0;
+  const today = new Date().toDateString();
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    totalPoints += data.points || 0;
+    if (data.lastActive === today) activeToday++;
+  });
+
+  document.getElementById('totalPoints').textContent = `Total points earned: ${totalPoints}`;
+  document.getElementById('activeUsers').textContent = `Active users today: ${activeToday}`;
+}
+
 // Show runtime since launch
 function showRuntime() {
   const currentYear = new Date().getFullYear();
@@ -58,3 +88,5 @@ window.login = function() {
 showUserCount();
 showRuntime();
 showTopUser();
+showDailyChallenge();
+showLiveStats();
