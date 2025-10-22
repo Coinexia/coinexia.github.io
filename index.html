@@ -10,11 +10,15 @@
 <body>
   <h1>Welcome to Coinexia</h1>
 
+  <!-- Login Button -->
+  <button onclick="login()">Sign in with Google</button>
+  <p id="userStatus">Not signed in</p>
+
   <!-- Earn Points Button -->
-  <button onclick="addPoints('jayden', 10)">Earn 10 Points</button>
+  <button onclick="addPoints()" disabled>Earn 10 Points</button>
 
   <!-- Check Points Button -->
-  <button onclick="checkPoints('jayden')">Check My Points</button>
+  <button onclick="checkPoints()" disabled>Check My Points</button>
 
   <!-- Display Area -->
   <p id="pointsDisplay">Current Points: ?</p>
