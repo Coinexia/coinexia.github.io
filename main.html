@@ -1,3 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coinexia Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --card: #2c2c2c;
+      --text: #f0f0f0;
+      --accent: #4caf50;
+      --gold: gold;
+    }
+    body.light {
+      --bg: #f0f0f0;
+      --card: #ffffff;
+      --text: #1e1e1e;
+      --accent: #4caf50;
+      --gold: goldenrod;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    #promoBanner {
+      position: fixed;
+      top: -100px;
+      left: 0;
+      right: 0;
+      background: var(--accent);
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+      transition: top 0.5s;
+      z-index: 999;
+    }
+    header {
+      background-color: var(--card);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #444;
+    }
+    .logo {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-tabs a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .nav-tabs a:hover {
+      color: var(--accent);
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--accent);
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      line-height: 40px;
+    }
+    .points, .rank, .multiplier {
+      font-size: 0.95em;
+    }
+    .rank { color: var(--gold); }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    .card {
+      background-color: var(--card);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .card h2 {
+      margin-top: 0;
+    }
+    .btn {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    .progress-bar {
+      background: #444;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-bar-fill {
+      height: 10px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s;
+    }
+    .leaderboard h3 { color: var(--gold); }
+    .leaderboard ul { list-style: none; padding: 0; }
+    .leaderboard li { margin: 6px 0; }
+    .referral, .history, .redeem, .profile, .streak {
+      font-size: 0.95em;
+    }
+    .toggle-theme {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    @media (max-width: 600px) {
+      header, .nav-tabs, .user-info {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body>
+  <div id="promoBanner">📣 Double points weekend is live!</div>
+  <header>
+    <div class="logo">Coinexia</div>
+    <nav class="nav-tabs">
+      <a href="#">Dashboard</a>
+      <a href="#">Earn</a>
+      <a href="#">Leaderboard</a>
+      <a href="#">Account</a>
+    </nav>
+    <div class="user-info">
+      <div class="avatar" id="avatar">?</div>
+      <div>
+        <div class="points" id="points">Loading...</div>
+        <div class="rank" id="rankLabel">Rank: ...</div>
+        <div class="multiplier" id="multiplierLabel">Bonus: ...</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card profile">
+      <h2>👤 Profile</h2>
+      <p id="profileName">Name: ...</p>
+      <p id="joinDate">Joined: ...</p>
+      <p id="referralCount">Referrals: ...</p>
+      <p id="streakCount">Streak: ... days</p>
+      <div class="progress-bar"><div class="progress-bar-fill" id="rankProgress"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>🔥 Daily Challenge</h2>
+      <p>Earn 50 points by completing 3 tasks</p>
+      <button class="btn" onclick="earnPoints()">Start Challenge</button>
+      <button class="btn" onclick="logout()">Log out</button>
+    </div>
+
+    <div class="card referral">
+      <h2>🔗 Your Referral Link</h2>
+      <p id="referralLink">Generating...</p>
+    </div>
+
+    <div class="card history">
+      <h2>📜 Task History</h2>
+      <ul id="taskHistoryList"></ul>
+    </div>
+
+    <div class="card redeem">
+      <h2>🎁 Redeem Points</h2>
+      <p>Coming soon: Convert points into crypto or gift cards!</p>
+    </div>
+
+    <div class="card leaderboard">
+      <h3>🏆 Leaderboard Preview</h3>
+      <ul id="leaderboardList"></ul>
+    </div>
+
+    <div class="card">
+      <h2>🛡️ Anti-Cheat</h2>
+      <p>✅ Verified Fair Play — All points are securely tracked via backend logic.</p>
+    </div>
+  </main>
+
+  <button class="toggle-theme" onclick="toggleTheme()">Toggle Theme</button>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDJmHmlTwvpDwEt3EJc6KVpi4X8meZeffc",
@@ -115,3 +331,5 @@
     }, 5000);
   }, 1000);
 </script>
+</body>
+</html>
