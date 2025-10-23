@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coinexia Account</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --card: #2c2c2c;
+      --text: #f0f0f0;
+      --accent: #4caf50;
+      --gold: gold;
+    }
+    body.light {
+      --bg: #f0f0f0;
+      --card: #ffffff;
+      --text: #1e1e1e;
+      --accent: #4caf50;
+      --gold: goldenrod;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background-color: var(--card);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #444;
+    }
+    .logo {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-tabs a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .nav-tabs a:hover {
+      color: var(--accent);
+    }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    .card {
+      background-color: var(--card);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .card h2 {
+      margin-top: 0;
+    }
+    .progress-bar {
+      background: #444;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-bar-fill {
+      height: 10px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s;
+    }
+    .toggle-theme {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">Coinexia</div>
+    <nav class="nav-tabs">
+      <a href="main.html">Dashboard</a>
+      <a href="#">Earn</a>
+      <a href="#">Leaderboard</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>👤 Profile</h2>
+      <p id="profileName">Name: ...</p>
+      <p id="joinDate">Joined: ...</p>
+      <p id="referralCount">Referrals: ...</p>
+      <p id="streakCount">Streak: ... days</p>
+      <div class="progress-bar"><div class="progress-bar-fill" id="rankProgress"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Stats</h2>
+      <p id="points">Points: ...</p>
+      <p id="rankLabel">Rank: ...</p>
+      <p id="multiplierLabel">Bonus: ...</p>
+    </div>
+
+    <div class="card">
+      <h2>🔗 Referral Link</h2>
+      <p id="referralLink">Generating...</p>
+    </div>
+  </main>
+
+  <button class="toggle-theme" onclick="toggleTheme()">Toggle Theme</button>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJmHmlTwvpDwEt3EJc6KVpi4X8meZeffc",
+      authDomain: "coinexia-748b6.firebaseapp.com",
+      projectId: "coinexia-748b6",
+      storageBucket: "coinexia-748b6.appspot.com",
+      messagingSenderId: "235020899567",
+      appId: "1:235020899567:web:0d4b031bb45ee6990a371a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    function getRank(points) {
+      if (points >= 5000) return "Gold";
+      if (points >= 1000) return "Silver";
+      return "Bronze";
+    }
+    function getMultiplier(rank) {
+      if (rank === "Gold") return "+20%";
+      if (rank === "Silver") return "+15%";
+      return "+5%";
+    }
+    function getProgress(points) {
+      if (points >= 5000) return 100;
+      if (points >= 1000) return Math.floor((points - 1000) / 4000 * 100);
+      return Math.floor(points / 1000 * 100);
+    }
+
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        const uid = user.uid;
+        document.getElementById('profileName').textContent = `Name: ${user.displayName}`;
+        const joinTimestamp = user.metadata?.creationTime;
+        if (joinTimestamp) {
+          const formattedDate = new Date(joinTimestamp).toDateString();
+          document.getElementById('joinDate').textContent = `Joined: ${formattedDate}`;
+        }
+
+        const userDoc = await db.collection('users').doc(uid).get();
+        const data = userDoc.exists ? userDoc.data() : {};
+        const points = data.points || 0;
+        const referrals = data.referrals || 0;
+        const streak = data.streak || 0;
+
+        const rank = getRank(points);
+        const multiplier = getMultiplier(rank);
+        const progress = getProgress(points);
+
+        document.getElementById('points').textContent = `Points: ${points}`;
+        document.getElementById('rankLabel').textContent = `Rank: ${rank}`;
+        document.getElementById('multiplierLabel').textContent = `Bonus: ${multiplier}`;
+        document.getElementById('referralCount').textContent = `Referrals: ${referrals}`;
+        document.getElementById('streakCount').textContent = `Streak: ${streak} days`;
+        document.getElementById('rankProgress').style.width = `${progress}%`;
+        document.getElementById('referralLink').textContent = `https://coinexia.github.io/?ref=${uid}`;
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+  </script>
+</body>
+</html>
