@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Coinexia Earn</title>
+  <title>Earn Coins</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
@@ -37,52 +37,75 @@
       font-weight: bold;
       color: var(--accent);
     }
-    .nav-tabs {
+    .tabs {
       display: flex;
       gap: 20px;
+      margin: 20px;
       flex-wrap: wrap;
     }
-    .nav-tabs a {
+    .tabs button {
+      background: none;
+      border: none;
       color: var(--text);
-      text-decoration: none;
       font-weight: 500;
-    }
-    .nav-tabs a:hover {
-      color: var(--accent);
-    }
-    main {
-      padding: 20px;
-      max-width: 800px;
-      margin: auto;
-    }
-    .card {
-      background-color: var(--card);
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
-    .card h2 {
-      margin-top: 0;
-    }
-    .task, .quest {
-      margin-bottom: 10px;
-      padding: 10px;
-      border: 1px solid #555;
+      cursor: pointer;
+      padding: 8px 12px;
       border-radius: 5px;
     }
-    .task.completed, .quest.completed {
-      background-color: #333;
-      opacity: 0.6;
-    }
-    .btn {
+    .tabs button:hover {
       background-color: var(--accent);
       color: white;
-      border: none;
+    }
+    .filters {
+      display: flex;
+      gap: 10px;
+      margin: 0 20px 20px;
+      flex-wrap: wrap;
+    }
+    .filters button {
+      background-color: var(--card);
+      border: 1px solid #555;
+      color: var(--text);
       padding: 6px 12px;
       border-radius: 5px;
       cursor: pointer;
-      margin-top: 5px;
+    }
+    .filters button.active {
+      background-color: var(--accent);
+      color: white;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 20px;
+      padding: 0 20px 60px;
+    }
+    .task-card {
+      background-color: var(--card);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .task-card:hover {
+      transform: scale(1.05);
+    }
+    .task-card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+    .task-title {
+      margin: 10px 0 5px;
+      font-weight: bold;
+      font-size: 0.95em;
+    }
+    .task-reward {
+      color: var(--accent);
+      font-size: 0.85em;
     }
     .toggle-theme {
       position: fixed;
@@ -95,58 +118,36 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    .streak-bar {
-      background: #444;
-      border-radius: 5px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-    .streak-fill {
-      height: 10px;
-      background: var(--accent);
-      width: 0%;
-      transition: width 0.5s;
-    }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 </head>
 <body>
   <header>
     <div class="logo">Coinexia</div>
-    <nav class="nav-tabs">
-      <a href="main.html">Dashboard</a>
-      <a href="earn.html">Earn</a>
-      <a href="leaderboard.html">Leaderboard</a>
-      <a href="account.html">Account</a>
-    </nav>
   </header>
 
-  <main>
-    <div class="card">
-      <h2>🔥 Daily Tasks</h2>
-      <div id="taskList">Loading tasks...</div>
-    </div>
+  <div class="tabs">
+    <button onclick="filterTab('offers')">Offers</button>
+    <button onclick="filterTab('surveys')">Surveys</button>
+    <button onclick="filterTab('all')">All Offers</button>
+    <button onclick="filterTab('progress')">In Progress</button>
+    <button onclick="filterTab('history')">Earning History</button>
+  </div>
 
-    <div class="card">
-      <h2>🧠 Skill Quests</h2>
-      <div id="questList">Loading quests...</div>
-    </div>
+  <div class="filters">
+    <button onclick="filterPlatform('all')" class="active">All</button>
+    <button onclick="filterPlatform('android')">Android</button>
+    <button onclick="filterPlatform('ios')">iOS</button>
+    <button onclick="filterPlatform('web')">Web</button>
+  </div>
 
-    <div class="card">
-      <h2>📅 Streak Tracker</h2>
-      <p id="streakText">Streak: ... days</p>
-      <div class="streak-bar"><div class="streak-fill" id="streakFill"></div></div>
-    </div>
-
-    <div class="card">
-      <h2>🛡️ Anti-Cheat</h2>
-      <p>✅ All tasks and rewards are verified via backend logic. No client-side manipulation allowed.</p>
-    </div>
-  </main>
+  <div class="grid" id="taskGrid">
+    <!-- Tasks will be loaded here -->
+  </div>
 
   <button class="toggle-theme" onclick="toggleTheme()">Toggle Theme</button>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDJmHmlTwvpDwEt3EJc6KVpi4X8meZeffc",
@@ -160,107 +161,106 @@
   const db = firebase.firestore();
   const auth = firebase.auth();
 
+  let allTasks = [];
+  let currentPlatform = "all";
+
   auth.onAuthStateChanged(async user => {
     if (user) {
       const uid = user.uid;
-      loadTasks(uid);
-      loadQuests(uid);
-      loadStreak(uid);
+      const snapshot = await db.collection("users").doc(uid).collection("tasks").get();
+      allTasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderTasks();
     } else {
       window.location.href = "index.html";
     }
   });
 
-  async function loadTasks(uid) {
-    const taskList = document.getElementById('taskList');
-    const snapshot = await db.collection('users').doc(uid).collection('tasks').get();
-    taskList.innerHTML = '';
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const div = document.createElement('div');
-      div.className = 'task' + (data.completed ? ' completed' : '');
-      div.innerHTML = `
-        <p><strong>${data.title}</strong></p>
-        <p>Reward: ${data.reward} pts</p>
-        <p>Status: ${data.completed ? '✅ Completed' : '⏳ Incomplete'}</p>
-        ${!data.completed ? `<button class="btn" onclick="completeTask('${doc.id}')">Complete</button>` : ''}
+  function renderTasks() {
+    const grid = document.getElementById("taskGrid");
+    grid.innerHTML = "";
+
+    const filtered = allTasks.filter(task => {
+      return currentPlatform === "all" || task.platform.toLowerCase() === currentPlatform;
+    });
+
+    filtered.forEach(task => {
+      const card = document.createElement("div");
+      card.className = "task-card";
+      card.onclick = () => openPreview(task);
+      card.innerHTML = `
+        <img src="${task.thumbnail}" alt="${task.title}">
+        <div class="task-title">${task.title}</div>
+        <div class="task-reward">${task.reward.toLocaleString()} Coins</div>
       `;
-      taskList.appendChild(div);
+      grid.appendChild(card);
     });
   }
 
-  async function completeTask(taskId) {
-    const user = auth.currentUser;
-    const uid = user.uid;
-    const taskRef = db.collection('users').doc(uid).collection('tasks').doc(taskId);
-    const taskDoc = await taskRef.get();
-    const reward = taskDoc.data().reward || 0;
-
-    await taskRef.update({ completed: true });
-    await db.collection('users').doc(uid).update({
-      points: firebase.firestore.FieldValue.increment(reward)
-    });
-    alert(`You earned ${reward} points!`);
-    loadTasks(uid);
-  }
-
-  async function loadQuests(uid) {
-    const questList = document.getElementById('questList');
-    const snapshot = await db.collection('users').doc(uid).collection('quests').get();
-    questList.innerHTML = '';
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const div = document.createElement('div');
-      div.className = 'quest' + (data.completed ? ' completed' : '');
-      div.innerHTML = `
-        <p><strong>${data.title}</strong></p>
-        <p>Reward: ${data.reward} pts</p>
-        <p>Status: ${data.completed ? '✅ Completed' : '⏳ Incomplete'}</p>
-        ${!data.completed ? `<button class="btn" onclick="completeQuest('${doc.id}')">Complete</button>` : ''}
-      `;
-      questList.appendChild(div);
-    });
-  }
-
-  async function completeQuest(questId) {
-    const user = auth.currentUser;
-    const uid = user.uid;
-    const questRef = db.collection('users').doc(uid).collection('quests').doc(questId);
-    const questDoc = await questRef.get();
-    const reward = questDoc.data().reward || 0;
-
-    await questRef.update({ completed: true });
-    await db.collection('users').doc(uid).update({
-      points: firebase.firestore.FieldValue.increment(reward)
-    });
-    alert(`You earned ${reward} points!`);
-    loadQuests(uid);
-  }
-
-  async function loadStreak(uid) {
-    const userDoc = await db.collection('users').doc(uid).get();
-    const streak = userDoc.data().streak || 0;
-    document.getElementById('streakText').textContent = `Streak: ${streak} days`;
-    document.getElementById('streakFill').style.width = `${Math.min(streak * 10, 100)}%`;
+  function filterPlatform(platform) {
+    currentPlatform = platform;
+    document.querySelectorAll(".filters button").forEach(btn => btn.classList.remove("active"));
+    document.querySelector(`.filters button[onclick="filterPlatform('${platform}')"]`).classList.add("active");
+    renderTasks();
   }
 
   function toggleTheme() {
-    const current = document.body.classList.contains('light');
+    const current = document.body.classList.contains("light");
     if (current) {
-      document.body.classList.remove('light');
-      localStorage.setItem('theme', 'dark');
+      document.body.classList.remove("light");
+      localStorage.setItem("theme", "dark");
     } else {
-      document.body.classList.add('light');
-      localStorage.setItem('theme', 'light');
+      document.body.classList.add("light");
+      localStorage.setItem("theme", "light");
     }
   }
 
   window.onload = () => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      document.body.classList.add('light');
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      document.body.classList.add("light");
     }
   };
+
+  function openPreview(task) {
+    const modal = document.createElement("div");
+    modal.style.position = "fixed";
+    modal.style.top = "0";
+    modal.style.left = "0";
+    modal.style.width = "100%";
+    modal.style.height = "100%";
+    modal.style.background = "rgba(0,0,0,0.8)";
+    modal.style.display = "flex";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+    modal.style.zIndex = "9999";
+
+    modal.innerHTML = `
+      <div style="background: var(--card); padding: 20px; border-radius: 10px; max-width: 400px; text-align: center; position: relative;">
+        <button onclick="this.parentElement.parentElement.remove()" style="position: absolute; top: 10px; right: 10px; background: red; color: white; border: none; padding: 5px 10px; border-radius: 5px;">❌</button>
+        <img src="${task.thumbnail}" style="width: 100px; height: 100px; border-radius: 10px;"><br><br>
+        <h3>${task.title}</h3>
+        <p>${task.description}</p>
+        <p><strong>Instructions:</strong> ${task.instructions}</p>
+        <p><strong>Reward:</strong> ${task.reward.toLocaleString()} Coins</p>
+        <a href="${task.link}" target="_blank"><button class="btn">Download</button></a>
+        ${!task.completed ? `<br><br><button class="btn" onclick="completeTask('${task.id}', ${task.reward}); this.parentElement.parentElement.remove()">Mark as Complete</button>` : `<p style="color: var(--accent); font-weight: bold;">✅ Completed</p>`}
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  async function completeTask(taskId, reward) {
+    const uid = auth.currentUser.uid;
+    const taskRef = db.collection("users").doc(uid).collection("tasks").doc(taskId);
+    await taskRef.update({ completed: true });
+    await db.collection("users").doc(uid).update({
+      points: firebase.firestore.FieldValue.increment(reward)
+    });
+    alert(`You earned ${reward.toLocaleString()} Coins!`);
+    const snapshot = await db.collection("users").doc(uid).collection("tasks").get();
+    allTasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderTasks();
+  }
 </script>
 </body>
 </html>
