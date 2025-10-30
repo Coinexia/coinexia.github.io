@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Orders Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --card: #2c2c2c;
+      --text: #f0f0f0;
+      --accent: #4caf50;
+    }
+    body.light {
+      --bg: #f0f0f0;
+      --card: #ffffff;
+      --text: #1e1e1e;
+      --accent: #4caf50;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background-color: var(--card);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #444;
+    }
+    .logo {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    main {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .card {
+      background-color: var(--card);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .card h2 {
+      margin-top: 0;
+    }
+    .order {
+      border-bottom: 1px solid #555;
+      padding: 10px 0;
+    }
+    .order:last-child {
+      border-bottom: none;
+    }
+    .btn {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    select {
+      padding: 6px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Coinexia Admin</div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>📊 Summary</h2>
+      <p>Total Orders: <span id="totalOrders">...</span></p>
+      <p>Paid Orders: <span id="paidOrders">...</span></p>
+      <p>Pending Orders: <span id="pendingOrders">...</span></p>
+    </div>
+
+    <div class="card">
+      <div class="filter-bar">
+        <h2>📄 Orders</h2>
+        <select id="statusFilter" onchange="applyFilter()">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+      <div id="orderList">Loading orders...</div>
+      <div class="pagination">
+        <button class="btn" onclick="prevPage()">◀️ Prev</button>
+        <span id="pageIndicator">Page 1</span>
+        <button class="btn" onclick="nextPage()">Next ▶️</button>
+        <button class="btn" onclick="jumpToNewest()">🚀 Jump to Newest Unpaid</button>
+      </div>
+    </div>
+  </main>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDJmHmlTwvpDwEt3EJc6KVpi4X8meZeffc",
+    authDomain: "coinexia-748b6.firebaseapp.com",
+    projectId: "coinexia-748b6",
+    storageBucket: "coinexia-748b6.appspot.com",
+    messagingSenderId: "235020899567",
+    appId: "1:235020899567:web:0d4b031bb45ee6990a371a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  let currentPage = 1;
+  let lastVisible = null;
+  let statusFilter = "all";
+  const pageSize = 25;
+
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      if (userDoc.data().role !== "admin") {
+        window.location.href = "index.html";
+        return;
+      }
+      loadSummary();
+      loadOrders();
+    } else {
+      window.location.href = "index.html";
+    }
+  });
+
+  async function loadSummary() {
+    const snapshot = await db.collection("orders").get();
+    const total = snapshot.size;
+    let paid = 0;
+    let pending = 0;
+    snapshot.forEach(doc => {
+      const status = doc.data().status;
+      if (status === "completed") paid++;
+      else if (status === "pending") pending++;
+    });
+    document.getElementById("totalOrders").textContent = total;
+    document.getElementById("paidOrders").textContent = paid;
+    document.getElementById("pendingOrders").textContent = pending;
+  }
+
+  async function loadOrders(direction = "next") {
+    let query = db.collection("orders").orderBy("createdAt");
+    if (statusFilter !== "all") {
+      query = query.where("status", "==", statusFilter);
+    }
+    query = query.limit(pageSize);
+
+    if (direction === "next" && lastVisible) {
+      query = query.startAfter(lastVisible);
+    }
+
+    const snapshot = await query.get();
+    const orderList = document.getElementById("orderList");
+    orderList.innerHTML = "";
+
+    if (!snapshot.empty) {
+      lastVisible = snapshot.docs[snapshot.docs.length - 1];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "order";
+        div.innerHTML = `
+          <p><strong>${data.username}</strong> | Amount: ${data.amount} pts</p>
+          <p>Status: ${data.status}</p>
+          <p>Task ID: ${data.taskId}</p>
+          <p>Created: ${new Date(data.createdAt.seconds * 1000).toLocaleString()}</p>
+          ${data.status === "pending" ? `<button class="btn" onclick="markCompleted('${doc.id}')">Mark as Completed</button>` : ""}
+        `;
+        orderList.appendChild(div);
+      });
+      document.getElementById("pageIndicator").textContent = `Page ${currentPage}`;
+    } else {
+      orderList.innerHTML = "<p>No more orders.</p>";
+    }
+  }
+
+  function prevPage() {
+    if (currentPage > 1) {
+      currentPage--;
+      lastVisible = null;
+      loadOrders("prev");
+    }
+  }
+
+  function nextPage() {
+    currentPage++;
+    loadOrders("next");
+  }
+
+  function applyFilter() {
+    statusFilter = document.getElementById("statusFilter").value;
+    currentPage = 1;
+    lastVisible = null;
+    loadOrders();
+  }
+
+  async function markCompleted(orderId) {
+    await db.collection("orders").doc(orderId).update({
+      status: "completed",
+      paidAt: firebase.firestore.Timestamp.now()
+    });
+    alert("Order marked as completed.");
+    loadSummary();
+    loadOrders();
+  }
+
+  async function jumpToNewest() {
+    const snapshot = await db.collection("orders")
+      .where("status", "==", "pending")
+      .orderBy("createdAt")
+      .get();
+
+    if (!snapshot.empty) {
+      const index = snapshot.docs.findIndex(doc => doc.data().status === "pending");
+      currentPage = Math.floor(index / pageSize) + 1;
+      lastVisible = null;
+      loadOrders();
+    } else {
+      alert("No unpaid orders found.");
+    }
+  }
+</script>
+</body>
+</html>

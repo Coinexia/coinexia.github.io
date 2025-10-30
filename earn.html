@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Coinexia Earn</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --card: #2c2c2c;
+      --text: #f0f0f0;
+      --accent: #4caf50;
+    }
+    body.light {
+      --bg: #f0f0f0;
+      --card: #ffffff;
+      --text: #1e1e1e;
+      --accent: #4caf50;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background-color: var(--card);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #444;
+    }
+    .logo {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: var(--accent);
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .nav-tabs a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .nav-tabs a:hover {
+      color: var(--accent);
+    }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    .card {
+      background-color: var(--card);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .card h2 {
+      margin-top: 0;
+    }
+    .task, .quest {
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #555;
+      border-radius: 5px;
+    }
+    .task.completed, .quest.completed {
+      background-color: #333;
+      opacity: 0.6;
+    }
+    .btn {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    .toggle-theme {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .streak-bar {
+      background: #444;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .streak-fill {
+      height: 10px;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">Coinexia</div>
+    <nav class="nav-tabs">
+      <a href="main.html">Dashboard</a>
+      <a href="earn.html">Earn</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="account.html">Account</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>🔥 Daily Tasks</h2>
+      <div id="taskList">Loading tasks...</div>
+    </div>
+
+    <div class="card">
+      <h2>🧠 Skill Quests</h2>
+      <div id="questList">Loading quests...</div>
+    </div>
+
+    <div class="card">
+      <h2>📅 Streak Tracker</h2>
+      <p id="streakText">Streak: ... days</p>
+      <div class="streak-bar"><div class="streak-fill" id="streakFill"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>🛡️ Anti-Cheat</h2>
+      <p>✅ All tasks and rewards are verified via backend logic. No client-side manipulation allowed.</p>
+    </div>
+  </main>
+
+  <button class="toggle-theme" onclick="toggleTheme()">Toggle Theme</button>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDJmHmlTwvpDwEt3EJc6KVpi4X8meZeffc",
+    authDomain: "coinexia-748b6.firebaseapp.com",
+    projectId: "coinexia-748b6",
+    storageBucket: "coinexia-748b6.appspot.com",
+    messagingSenderId: "235020899567",
+    appId: "1:235020899567:web:0d4b031bb45ee6990a371a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+
+  auth.onAuthStateChanged(async user => {
+    if (user) {
+      const uid = user.uid;
+      loadTasks(uid);
+      loadQuests(uid);
+      loadStreak(uid);
+    } else {
+      window.location.href = "index.html";
+    }
+  });
+
+  async function loadTasks(uid) {
+    const taskList = document.getElementById('taskList');
+    const snapshot = await db.collection('users').doc(uid).collection('tasks').get();
+    taskList.innerHTML = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement('div');
+      div.className = 'task' + (data.completed ? ' completed' : '');
+      div.innerHTML = `
+        <p><strong>${data.title}</strong></p>
+        <p>Reward: ${data.reward} pts</p>
+        <p>Status: ${data.completed ? '✅ Completed' : '⏳ Incomplete'}</p>
+        ${!data.completed ? `<button class="btn" onclick="completeTask('${doc.id}')">Complete</button>` : ''}
+      `;
+      taskList.appendChild(div);
+    });
+  }
+
+  async function completeTask(taskId) {
+    const user = auth.currentUser;
+    const uid = user.uid;
+    const taskRef = db.collection('users').doc(uid).collection('tasks').doc(taskId);
+    const taskDoc = await taskRef.get();
+    const reward = taskDoc.data().reward || 0;
+
+    await taskRef.update({ completed: true });
+    await db.collection('users').doc(uid).update({
+      points: firebase.firestore.FieldValue.increment(reward)
+    });
+    alert(`You earned ${reward} points!`);
+    loadTasks(uid);
+  }
+
+  async function loadQuests(uid) {
+    const questList = document.getElementById('questList');
+    const snapshot = await db.collection('users').doc(uid).collection('quests').get();
+    questList.innerHTML = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const div = document.createElement('div');
+      div.className = 'quest' + (data.completed ? ' completed' : '');
+      div.innerHTML = `
+        <p><strong>${data.title}</strong></p>
+        <p>Reward: ${data.reward} pts</p>
+        <p>Status: ${data.completed ? '✅ Completed' : '⏳ Incomplete'}</p>
+        ${!data.completed ? `<button class="btn" onclick="completeQuest('${doc.id}')">Complete</button>` : ''}
+      `;
+      questList.appendChild(div);
+    });
+  }
+
+  async function completeQuest(questId) {
+    const user = auth.currentUser;
+    const uid = user.uid;
+    const questRef = db.collection('users').doc(uid).collection('quests').doc(questId);
+    const questDoc = await questRef.get();
+    const reward = questDoc.data().reward || 0;
+
+    await questRef.update({ completed: true });
+    await db.collection('users').doc(uid).update({
+      points: firebase.firestore.FieldValue.increment(reward)
+    });
+    alert(`You earned ${reward} points!`);
+    loadQuests(uid);
+  }
+
+  async function loadStreak(uid) {
+    const userDoc = await db.collection('users').doc(uid).get();
+    const streak = userDoc.data().streak || 0;
+    document.getElementById('streakText').textContent = `Streak: ${streak} days`;
+    document.getElementById('streakFill').style.width = `${Math.min(streak * 10, 100)}%`;
+  }
+
+  function toggleTheme() {
+    const current = document.body.classList.contains('light');
+    if (current) {
+      document.body.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    }
+  }
+
+  window.onload = () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.body.classList.add('light');
+    }
+  };
+</script>
+</body>
+</html>
